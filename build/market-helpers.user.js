@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name sillymarket helpers!
 // @description helpers for sillymarket!
-// @version 0.0.1-2025-05-11T04:21:37.207Z
+// @version 0.0.1-2025-05-11T05:06:44.745Z
 // @author nepeat
 // @match https://sillypost.net/games/sillyexchange
 // @downloadURL https://raw.githubusercontent.com/nepeat/sillypost-userscripts/refs/heads/main/build/market-helpers.user.js
@@ -12,6 +12,7 @@
 // ==/UserScript==
 
 (() => { // webpackBootstrap
+"use strict";
 var __webpack_modules__ = ({});
 /************************************************************************/
 // The module cache
@@ -48,6 +49,36 @@ __webpack_require__.ruid = "bundler=rspack@1.3.9";
 
 })();
 /************************************************************************/
+
+;// CONCATENATED MODULE: ./src/html/market.ts
+const updateBalance = async function(balance) {
+    const balanceElement = document.getElementById("sillies-owned");
+    if (balanceElement) {
+        balanceElement.textContent = balance.toString();
+    }
+};
+const updateBeans = async function(beans) {
+    const beansElement = document.getElementById("header-beans");
+    if (beansElement) {
+        // we're going to assume that the beans element is the third node
+        beansElement.childNodes[2].textContent = ' ' + beans.toString() + ' beans';
+    }
+};
+
+;// CONCATENATED MODULE: ./src/api/user.ts
+const getBeansBalance = async ()=>{
+    const res = await fetch("https://sillypost.net/beans", {
+        "method": "GET",
+        "mode": "cors",
+        "credentials": "include"
+    });
+    const owned = await res.text();
+    return Number.parseInt(owned);
+};
+
+;// CONCATENATED MODULE: ./src/api/market.ts
+
+
 const getBalance = async ()=>{
     const res = await fetch("https://sillypost.net/games/sillyexchange/owned", {
         "method": "POST",
@@ -56,13 +87,6 @@ const getBalance = async ()=>{
     });
     const owned = await res.text();
     return Number.parseInt(owned);
-};
-const updateBalance = async ()=>{
-    const balanceElement = document.getElementById("sillies-owned");
-    if (balanceElement) {
-        const balance = await getBalance();
-        balanceElement.textContent = balance.toString();
-    }
 };
 const tradeMax = async (buy)=>{
     const balance = await getBalance();
@@ -84,12 +108,15 @@ const tradeMax = async (buy)=>{
     });
     // update the balance if successful
     if (res.ok) {
-        await updateBalance();
+        const newBeanBalance = await getBeansBalance();
+        await updateBalance(balance + (buy ? stonks : -stonks));
+        await updateBeans(newBeanBalance);
     }
 };
-(async function() {
-    'use strict';
-    // Your code here...
+
+;// CONCATENATED MODULE: ./src/market-helpers.ts
+
+const main = async ()=>{
     const actionsDiv = document.getElementById("actions");
     if (actionsDiv) {
         // Append the buy / sell max buttons
@@ -117,7 +144,8 @@ const tradeMax = async (buy)=>{
         grafanaIframe.frameBorder = "0";
         descriptionDiv.prepend(grafanaIframe);
     }
-})();
+};
+main();
 
 })()
 ;

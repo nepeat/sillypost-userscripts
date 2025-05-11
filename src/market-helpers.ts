@@ -1,57 +1,6 @@
-const getBalance = async () => {
-    const res = await fetch("https://sillypost.net/games/sillyexchange/owned", {
-        "method": "POST",
-        "mode": "cors",
-        "credentials": "include"
-    });
-    const owned = await res.text();
+import { tradeMax } from "./api/market";
 
-    return Number.parseInt(owned);
-}
-
-const updateBalance = async () => {
-    const balanceElement = document.getElementById("sillies-owned");
-    if (balanceElement) {
-        const balance = await getBalance();
-
-        balanceElement.textContent = balance.toString();
-    }
-}
-
-const tradeMax = async (buy: boolean) => {
-    const balance = await getBalance();
-    const action = buy ? "buy" : "sell";
-
-    console.log("tradeMax clicked, buying", buy, "balance", balance);
-
-    let stonks = 0
-
-    if (buy) {
-        stonks = 1000 - balance;
-    } else {
-        stonks = balance;
-    }
-
-    // construct endpoint and add amount
-    let endpoint = `https://sillypost.net/games/sillyexchange/${action}/${stonks}`;
-
-    // make the request
-    const res = await fetch(endpoint, {
-        "method": "POST",
-        "mode": "cors",
-        "credentials": "include"
-    });
-
-    // update the balance if successful
-    if (res.ok) {
-        await updateBalance();
-    }
-}
-
-(async function () {
-    'use strict';
-
-    // Your code here...
+const main = async () => {
     const actionsDiv = document.getElementById("actions");
 
     if (actionsDiv) {
@@ -85,4 +34,6 @@ const tradeMax = async (buy: boolean) => {
         grafanaIframe.frameBorder = "0";
         descriptionDiv.prepend(grafanaIframe);
     }
-})();
+};
+
+(main());
